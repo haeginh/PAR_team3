@@ -1,0 +1,4 @@
+temp 1200 K
+deltaT 1E-5
+pressure 1 bar
+#deltaX 1
