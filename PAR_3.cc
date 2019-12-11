@@ -2,6 +2,7 @@
 #include <string>
 #include "InputData.hh"
 #include "G4SystemOfUnits.hh"
+#include "ChemicalPart.hh"
 
 using namespace std;
 int main(int argc, char** argv)
@@ -19,6 +20,6 @@ int main(int argc, char** argv)
 	input.SummarizeData();
 
 	//Chemical class
-
+	ChemicalPart* chem = new ChemicalPart(5);
 	return 0;
 }
