@@ -28,6 +28,7 @@ endif()
 include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+find_package(OpenMP)
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
 # NB: headers are included so they will show up in IDEs
@@ -40,7 +41,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_executable(PAR_3 PAR_3.cc ${sources} ${headers})
 #SET_TARGET_PROPERTIES(PAR_3 PROPERTIES COMPILE_FLAGS "-fopenmp" LINK_FLAGS "-fopenmp")
-target_link_libraries(PAR_3 ${Geant4_LIBRARIES} )#${OpenMP_CXX_LIBRARIES})
+target_link_libraries(PAR_3 ${Geant4_LIBRARIES} OpenMP::OpenMP_CXX)
+#${OpenMP_CXX_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B4a. This is so that we can run the executable directly because it
