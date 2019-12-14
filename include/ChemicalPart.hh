@@ -51,7 +51,7 @@ public:
 		ArrayXd hH2O; hH2O.resize(nodeNum);
 		for(int i=0;i<nodeNum;i++)
 			hH2O(i)=constCal->GetConstant(H2O, h, temp(i));
-		return (wH2*fH2*hH2 + wO2*fO2*hO2 + wH2O*fH2O*hH2O).matrix();
+		return (wH2*rH2*hH2 + wO2*rO2*hO2 + wH2O*rH2O*hH2O).matrix();
 	}
 	void ResetByFlow(VectorXd _fU, VectorXd _fR, VectorXd _fT){
 		fU = _fU.segment(1, nodeNum);

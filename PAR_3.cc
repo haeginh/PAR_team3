@@ -27,9 +27,9 @@ int main(int argc, char** argv)
 	ConstCalculator* constCal = new ConstCalculator();
 	timer.Stop();cout<<timer.GetRealElapsed()<<endl;
 //	constCal->ReadData();
-
+int nodeNum = 5;
 	//Chemical class
-	ChemicalPart* chem = new ChemicalPart(5, constCal);
+	ChemicalPart* chem = new ChemicalPart(nodeNum, constCal);
 
 	//initial update by chem. (get init. temp.)
 	/////////*******TEMP + 900***********
@@ -47,14 +47,16 @@ int main(int argc, char** argv)
 
 	//flow class
 	cout<<temp<<endl;
-	FlowPart* flow = new FlowPart(5, constCal);
+	FlowPart* flow = new FlowPart(nodeNum, constCal);
 	flow->SetTinf(356.821);
-	flow->SetDensity(constCal->GetConstant(air, den, 360));
-	flow->SetDeltaT(0.1);
+	flow->SetDensity(constCal->GetConstant(air, den, temp));
+	flow->SetDeltaT(0.01);
 	flow->SetFlowVel(0.);
 //	flow->SetTemp(temp);
-	VectorXd fT = VectorXd::Constant(5, temp);
-	for(int i=0;i<100;i++){
+	VectorXd fT = VectorXd::Constant(nodeNum, temp);
+//	chem->ResetByFlow(VectorXd::Constant(nodeNum+2, 0), VectorXd::Constant(nodeNum+2, constCal->GetConstant(air, den, temp)), VectorXd::Constant(nodeNum+2, temp));
+//	fT = chem->UpdateForTimeStep(0.00001);
+	for(int i=0;i<1000;i++){
 		flow->ResetByChem(chem->CalculateCHE(), fT);
 		VectorXd fU, fR;
 		flow->UpdateAll(fU, fR, fT);

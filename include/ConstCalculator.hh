@@ -25,6 +25,8 @@ public:
 	double GetConstant(mat _mat, constant _const, double fT);
 	double CalculateBeta(double fT) {
 		int intTemp = floor(fT);
+		if(intTemp+1>prev(dAir.end())->first) intTemp =prev(dAir.end())->first-1;
+		else if(intTemp<dAir.begin()->first) intTemp = dAir.begin()->first;
 		return -(dAir[intTemp+1][den]-dAir[intTemp][den])/GetConstant(air, den, fT);
 	};
 

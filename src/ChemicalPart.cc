@@ -16,8 +16,6 @@ ChemicalPart::ChemicalPart(int _nodeNum, ConstCalculator* _constCal)
   wO(15.9994*0.001), wH2(2.01588*0.001), wO2(31.9988*0.001), wH(1.00794*0.001), wOH(17.00734*0.001), wHO2(33.00674*0.001), wH2O(18.01528*0.001),
   tempChk(false), denChk(false), pressChk(false), airChk(false)
 {
-
-
 	//fake init of fU fR
 	fU = VectorXd::Constant(nodeNum, 0.0001);
 	fR = VectorXd::Constant(nodeNum, 0.0001);
@@ -90,6 +88,7 @@ double ChemicalPart::InitialUpdate(double time)
 	double iH2O = fH2O(0);
 	double iN2 = fN2(0);
 	double iTemp = temp(0);
+	double irO, irH2, irO2, irH, irOH, irHO2, irH2O;
 	int itNum = floor(time/dt);
 	stringstream ss;
 	for(int i=0;i<itNum;i++){
@@ -147,22 +146,21 @@ double ChemicalPart::InitialUpdate(double time)
 		double r_c_h2o = p_3_b;
 
 //		//change rate
-//		double irO = p_c_o - r_c_o;
-//		double irH2 = p_c_h2  - r_c_h2;
-//		double irO2 = p_c_o2 - r_c_o2;
-//		double irH = p_c_h - r_c_h;
-//		double irOH = p_c_oh - r_c_oh;
-//		double irHO2 = p_c_ho2 -  r_c_ho2;
-//		double irH2O = p_c_h2o - r_c_h2o;
+		irO = p_c_o - r_c_o;
+		irH2 = p_c_h2  - r_c_h2;
+		irO2 = p_c_o2 - r_c_o2;
+		irH = p_c_h - r_c_h;
+		irOH = p_c_oh - r_c_oh;
+		irHO2 = p_c_ho2 -  r_c_ho2;
+		irH2O = p_c_h2o - r_c_h2o;
 
-		//change rate by species
-		iO = (p_c_o - r_c_o)*dt + iO;
-		iH2 = (p_c_h2  - r_c_h2)*dt + iH2;
-		iO2 = (p_c_o2 - r_c_o2)*dt + iO2;
-		iH = (p_c_h - r_c_h)*dt + iH;
-		iOH = (p_c_oh - r_c_oh)*dt + iOH;
-		iHO2 = (p_c_ho2 -  r_c_ho2)*dt + iHO2;
-		iH2O = (p_c_h2o - r_c_h2o)*dt + iH2O;
+		iO = irO*dt + iO;
+		iH2 = irH2*dt + iH2;
+		iO2 = irO2*dt + iO2;
+		iH = irH*dt + iH;
+		iOH = irOH*dt + iOH;
+		iHO2 = irHO2*dt + iHO2;
+		iH2O = irH2O*dt + iH2O;
 
 		if(dTSum>1){
 			iCpH2 = constCal->GetConstant(H2, Cp, iTemp);
@@ -177,6 +175,14 @@ double ChemicalPart::InitialUpdate(double time)
 		iTemp = iTemp + dT;
 		dTSum += dT;
 	}
+	rO = VectorXd::Constant(nodeNum, irO);
+	rH2 = VectorXd::Constant(nodeNum, irH2);
+	rO2 = VectorXd::Constant(nodeNum, irO2);
+	rH = VectorXd::Constant(nodeNum, irH);
+	rOH = VectorXd::Constant(nodeNum, irOH);
+	rHO2 = VectorXd::Constant(nodeNum, irHO2);
+	rH2O = VectorXd::Constant(nodeNum, irH2O);
+
 	fO = VectorXd::Constant(nodeNum, iO);
 	fH2 = VectorXd::Constant(nodeNum, iH2);
 	fO2 = VectorXd::Constant(nodeNum, iO2);
@@ -280,11 +286,13 @@ return dT;
 }
 
 void ChemicalPart::UpdateChemEq(ArrayXd &con, ArrayXd changeR, double w){
-	VectorXd oldCon = con.matrix();
-	VectorXd newCon(nodeNum);
+	VectorXd oldY = (con * w)/fR.array();
+	VectorXd newY(nodeNum);
 	VectorXd r = changeR.matrix();
 	MatrixXd matU = fU.asDiagonal();
 	MatrixXd matRinv = (1/fR.array()).matrix().asDiagonal();
-	newCon = (mI+(dt/dx)*matU*mO)*oldCon + (dt*w)*(matRinv*r);
-	con = newCon.array();
+	newY = (mI+(dt/dx)*matU*mO)*oldY + (dt*w)*(matRinv*r);
+	//newY = ((mI+(dt/dx)*matU*mO)*oldCon + (dt*w)*(matRinv*r)).array()*fR.array()/w;
+	//cout<<newCon;getchar();
+	con = ((newY.array()*fR.array())/w).matrix();
 }
