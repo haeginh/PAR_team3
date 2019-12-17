@@ -28,7 +28,7 @@ double ConstCalculator::GetConstant(mat _mat, constant _const, double fT){
 double ConstCalculator::GetValue(map<int, vector<double>> data, int idx, double fT){
 	int iT = floor(fT);
 	if(iT<data.begin()->first) return data.begin()->second[idx]; //value for the lowest T
-	if(iT>prev(data.end())->first) return prev(data.end())->second[idx];
+	if(iT+1>prev(data.end())->first) return prev(data.end())->second[idx];
 	double prevVal = data[iT][idx];
 	double nextVal = data[iT+1][idx];
 	return prevVal + (nextVal-prevVal)*(fT-iT);

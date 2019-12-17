@@ -22,7 +22,7 @@ public:
 	void SetDeltaT(double _dt) {dt = _dt;}
 	void SetDensity(double density){
 		fR = VectorXd::Constant(nodeNum+2, density);
-		fR(0) = dInf; fR(nodeNum) = dInf;
+		fR(0) = dInf; fR(nodeNum+1) = dInf;
 	}
 	void SetTinf(double t){
 		tInf = t;
@@ -39,8 +39,8 @@ public:
 	}
 	void ResetByChem(VectorXd _che, VectorXd _fT){
 		che(0) = 0; che(nodeNum+1) = 0;
-		che.segment(1, nodeNum) = _che;
-		fT.segment(1, nodeNum) = _fT;
+		che= _che;
+		fT = _fT;
 		fT(0) = tInf; fT(nodeNum+1) = tInf;
 	}
 	void UpdateAll(VectorXd &_fU, VectorXd &_fR, VectorXd &_fT);

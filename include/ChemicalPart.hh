@@ -21,11 +21,11 @@ public:
 
 	void SetInitTemp(double _temp) {
 		tempChk = true;
-		temp = VectorXd::Constant(nodeNum, _temp).array();
+		temp = VectorXd::Constant(nodeNum+2, _temp).array();
 	}
 	void SetInitDensity(double density){
 		denChk = true;
-		fR = VectorXd::Constant(nodeNum, density);
+		fR = VectorXd::Constant(nodeNum+2, density);
 	}
 //	void SetInitFlowVel(double u) {
 //		flowChk = true;
@@ -42,32 +42,32 @@ public:
 	VectorXd UpdateForTimeStep(double time);
 	double InitialUpdate(double time);
 	VectorXd CalculateCHE(){
-		ArrayXd hH2; hH2.resize(nodeNum);
-		for(int i=0;i<nodeNum;i++)
+		ArrayXd hH2; hH2.resize(nodeNum+2);
+		for(int i=0;i<nodeNum+2;i++)
 			hH2(i)=constCal->GetConstant(H2, h, temp(i));
-		ArrayXd hO2; hO2.resize(nodeNum);
-		for(int i=0;i<nodeNum;i++)
+		ArrayXd hO2; hO2.resize(nodeNum+2);
+		for(int i=0;i<nodeNum+2;i++)
 			hO2(i)=constCal->GetConstant(O2, h, temp(i));
-		ArrayXd hH2O; hH2O.resize(nodeNum);
-		for(int i=0;i<nodeNum;i++)
+		ArrayXd hH2O; hH2O.resize(nodeNum+2);
+		for(int i=0;i<nodeNum+2;i++)
 			hH2O(i)=constCal->GetConstant(H2O, h, temp(i));
 		return (wH2*rH2*hH2 + wO2*rO2*hO2 + wH2O*rH2O*hH2O).matrix();
 	}
 	void ResetByFlow(VectorXd _fU, VectorXd _fR, VectorXd _fT){
-		fU = _fU.segment(1, nodeNum);
-		fR = _fR.segment(1, nodeNum);
-		temp = _fT.segment(1, nodeNum);
+		fU = _fU;
+		fR = _fR;
+		temp = _fT;
 	}
 
 private:
 	ArrayXd Update();
-	void UpdateChemEq(ArrayXd &con, ArrayXd changeR, double w);
+	double UpdateChemEq(ArrayXd &con, ArrayXd changeR, double w);
 	int nodeNum;
 	ConstCalculator* constCal;
 	double gasConst;
 	double dt, dx;
 	double press;
-	double pH2, pH2O;
+	double pH2, pH2O, pH, pOH, pO, pHO2;
 	double h0H2, h0O2, h0N2, h0H2O, h0OH, h0HO2; //standard enthalpy
 	double wO, wH2, wO2, wH, wOH, wHO2, wH2O;
 
@@ -85,6 +85,9 @@ private:
 
 	//initialize chk
 	bool tempChk, denChk, pressChk, airChk;
+
+	//inf. values
+	double iH2, iO2, iN2, iH2O, iH, iOH, iO, iHO2;
 };
 
 #endif

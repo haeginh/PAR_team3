@@ -21,9 +21,9 @@ FlowPart::FlowPart(int _nodeNum, ConstCalculator* _constCal)
 	fR.resize(nodeNum+2);
 	//set basic matrices
 	mI = MatrixXd::Identity(nodeNum+2, nodeNum+2);
-	MatrixXd mat(nodeNum+2, nodeNum+2); mat.topRightCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
+	MatrixXd mat=MatrixXd::Zero(nodeNum+2, nodeNum+2); mat.bottomLeftCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
 	mO = mI - mat;
-	MatrixXd mat2(nodeNum+2, nodeNum+2); mat2.bottomLeftCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
+	MatrixXd mat2=MatrixXd::Zero(nodeNum+2, nodeNum+2); mat2.bottomLeftCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
 	mZ = -2*mI + mat + mat2;
 }
 
@@ -45,7 +45,7 @@ void FlowPart::UpdateAll(VectorXd &_fU, VectorXd &_fR, VectorXd &_fT){
 
 void FlowPart::UpdateDensity(){
 	VectorXd newR;
-	newR = (mI + (dt/dx)*mO*matU)*fR;
+	newR = (mI - (dt/dx)*mO*matU)*fR;
 	fR = newR;
 }
 
@@ -56,7 +56,7 @@ void FlowPart::UpdateMomentum(){
 	}
 	VectorXd newU;
 	MatrixXd matBeta = beta.asDiagonal();
-	newU = (dt/dx*matU*mO + mI)*fU + dt*g*matBeta*(fT.array()-tInf).matrix();
+	newU = (mI - dt*0.5/dx*mO*matU)*fU + dt*g*matBeta*(fT.array()-tInf).matrix();
 	fU = newU;
 }
 
@@ -72,7 +72,9 @@ void FlowPart::UpdateEnergy(){
 	}
 	MatrixXd matLam = lambdaV.asDiagonal();
 	MatrixXd matCPinv  = cpInv.asDiagonal();
-	VectorXd newT = (dt/(dx*dx)*matLam*matRinv*matCPinv*mZ + dt/dx*matU*mO + mI)*fT
-			        + dt*matRinv*matCPinv*che;
+	VectorXd newT = (mI - dt/dx*matU*mO)*fT + dt/(dx*dx)*matRinv*matCPinv*matLam*mZ*fT
+			        - dt*matRinv*matCPinv*che;
+//	VectorXd newT = (dt/(dx*dx)*matLam*matRinv*matCPinv*mZ + dt/dx*matU*mO + mI)*fT
+//			        + dt*matRinv*matCPinv*che;
 	fT = newT;
 }
