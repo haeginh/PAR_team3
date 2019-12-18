@@ -35,11 +35,11 @@ double ConstCalculator::GetValue(map<int, vector<double>> data, int idx, double 
 }
 
 void ConstCalculator::ReadData(){
-	ReadDataFile("./data/H2.txt", dH2);
-	ReadDataFile("./data/N2.txt", dN2);
-	ReadDataFile("./data/Steam.txt", dSteam);
-	ReadDataFile("./data/O2.txt", dO2);
-	ReadDataFile("./data/air.txt", dAir);
+	ReadDataFile("./data2/H2.txt", dH2);
+	ReadDataFile("./data2/N2.txt", dN2);
+	ReadDataFile("./data2/Steam.txt", dSteam);
+	ReadDataFile("./data2/O2.txt", dO2);
+	ReadDataFile("./data2/air.txt", dAir);
 }
 
 void ConstCalculator::ReadDataFile(string fileN, map<int, vector<double>> &data){

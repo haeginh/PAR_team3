@@ -20,11 +20,13 @@ public:
 	void   ReadData(string fileName);
 	void   SummarizeData();
 	double GetData(string name) {return initData[name];}
+	bool   DataExists(string name) {
+		if(initData.find(name)!=initData.end()) return true;
+		else return false;
+	}
 
 private:
 	map<string, double> initData;
-	map<string, double> valueData;
-	map<string, string> unitData;
 };
 
 #endif /* SRC_INPUTDATA_HH_ */

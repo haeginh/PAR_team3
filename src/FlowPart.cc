@@ -15,15 +15,15 @@ FlowPart::FlowPart(int _nodeNum, ConstCalculator* _constCal)
 	SetFlowVel(0);
 	SetTemp(0);
 	dx = height/(double)nodeNum;
-	che.resize(nodeNum+2);
-	fT.resize(nodeNum+2);
-	fU.resize(nodeNum+2);
-	fR.resize(nodeNum+2);
+	che.resize(nodeNum+1);
+	fT.resize(nodeNum+1);
+	fU.resize(nodeNum+1);
+	fR.resize(nodeNum+1);
 	//set basic matrices
-	mI = MatrixXd::Identity(nodeNum+2, nodeNum+2);
-	MatrixXd mat=MatrixXd::Zero(nodeNum+2, nodeNum+2); mat.bottomLeftCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
+	mI = MatrixXd::Identity(nodeNum+1, nodeNum+1);
+	MatrixXd mat=MatrixXd::Zero(nodeNum+1, nodeNum+1); mat.bottomLeftCorner(nodeNum, nodeNum) = MatrixXd::Identity(nodeNum, nodeNum);
 	mO = mI - mat;
-	MatrixXd mat2=MatrixXd::Zero(nodeNum+2, nodeNum+2); mat2.bottomLeftCorner(nodeNum+1, nodeNum+1) = MatrixXd::Identity(nodeNum+1, nodeNum+1);
+	MatrixXd mat2=MatrixXd::Zero(nodeNum+1, nodeNum+1); mat2.bottomLeftCorner(nodeNum, nodeNum) = MatrixXd::Identity(nodeNum, nodeNum);
 	mZ = -2*mI + mat + mat2;
 }
 
@@ -33,14 +33,13 @@ FlowPart::~FlowPart() {
 
 void FlowPart::UpdateAll(VectorXd &_fU, VectorXd &_fR, VectorXd &_fT){
 	matU = fU.asDiagonal();
-	UpdateDensity();
 	UpdateMomentum();
+	UpdateDensity();
 	UpdateEnergy();
-	fU(0) = 0; fU(nodeNum+1) = 0;
-	fR(0) = dInf; fR(nodeNum+1) = dInf;
-	fT(0) = tInf; fT(nodeNum+1) = tInf;
+	fU(0) = fU(1);
+	fR(0) = dInf;
+	fT(0) = tInf;
 	_fU = fU; _fR = fR; _fT = fT;
-	cout<<"flow: "<<endl<<fT<<endl;
 }
 
 void FlowPart::UpdateDensity(){
@@ -50,8 +49,8 @@ void FlowPart::UpdateDensity(){
 }
 
 void FlowPart::UpdateMomentum(){
-	VectorXd beta; beta.resize(nodeNum+2);
-	for(int i=0;i<nodeNum+2;i++){
+	VectorXd beta; beta.resize(nodeNum+1);
+	for(int i=0;i<nodeNum+1;i++){
 		beta(i)=constCal->CalculateBeta(fT(i));
 	}
 	VectorXd newU;
@@ -62,19 +61,17 @@ void FlowPart::UpdateMomentum(){
 
 void FlowPart::UpdateEnergy(){
 	MatrixXd matRinv = (1/fR.array()).matrix().asDiagonal();
-	VectorXd lambdaV; lambdaV.resize(nodeNum+2);
-	for(int i=0;i<nodeNum+2;i++){
+	VectorXd lambdaV; lambdaV.resize(nodeNum+1);
+	for(int i=0;i<nodeNum+1;i++){
 		lambdaV(i)=constCal->GetConstant(air, lambda, fT(i));
 	}
-	VectorXd cpInv; cpInv.resize(nodeNum+2);
-	for(int i=0;i<nodeNum+2;i++){
+	VectorXd cpInv; cpInv.resize(nodeNum+1);
+	for(int i=0;i<nodeNum+1;i++){
 		cpInv(i) = 1./constCal->GetConstant(air, Cp, fT(i));
 	}
 	MatrixXd matLam = lambdaV.asDiagonal();
 	MatrixXd matCPinv  = cpInv.asDiagonal();
 	VectorXd newT = (mI - dt/dx*matU*mO)*fT + dt/(dx*dx)*matRinv*matCPinv*matLam*mZ*fT
 			        - dt*matRinv*matCPinv*che;
-//	VectorXd newT = (dt/(dx*dx)*matLam*matRinv*matCPinv*mZ + dt/dx*matU*mO + mI)*fT
-//			        + dt*matRinv*matCPinv*che;
 	fT = newT;
 }

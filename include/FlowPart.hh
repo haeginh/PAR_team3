@@ -20,9 +20,10 @@ public:
 	virtual ~FlowPart();
 
 	void SetDeltaT(double _dt) {dt = _dt;}
+	void SetHeight(double _h) {height = _h; dx = height/(double)nodeNum;}
 	void SetDensity(double density){
-		fR = VectorXd::Constant(nodeNum+2, density);
-		fR(0) = dInf; fR(nodeNum+1) = dInf;
+		fR = VectorXd::Constant(nodeNum+1, density);
+		fR(0) = dInf;
 	}
 	void SetTinf(double t){
 		tInf = t;
@@ -32,16 +33,16 @@ public:
 		cpInf = constCal->GetConstant(air, Cp, t);
 	}
 	void SetFlowVel(double u){
-		fU = VectorXd::Constant(nodeNum+2, u);
+		fU = VectorXd::Constant(nodeNum+1, u);
 	}
 	void SetTemp(double temp){
-		fT = VectorXd::Constant(nodeNum+2, temp);
+		fT = VectorXd::Constant(nodeNum+1, temp);
 	}
 	void ResetByChem(VectorXd _che, VectorXd _fT){
-		che(0) = 0; che(nodeNum+1) = 0;
+		che(0) = 0;
 		che= _che;
 		fT = _fT;
-		fT(0) = tInf; fT(nodeNum+1) = tInf;
+		fT(0) = tInf;
 	}
 	void UpdateAll(VectorXd &_fU, VectorXd &_fR, VectorXd &_fT);
 
@@ -66,6 +67,8 @@ private:
 
 	//PAR
 	double height;
+
+
 };
 
 #endif /* SRC_FLOWPART_HH_ */

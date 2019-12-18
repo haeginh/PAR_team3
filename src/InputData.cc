@@ -24,21 +24,16 @@ void InputData::ReadData(string fileName){
 	while(getline(ifs, dump)){
 		if(dump.empty()) continue;
 		stringstream ss(dump);
-		string name, unit; double value;
-		ss>>name>>value>>unit;
+		string name; double value;
+		ss>>name>>value;
 		if(name.substr(0, 1)=="#") continue;
 		initData[name] = value;
-		valueData[name] = value;
-		if(!unit.empty()){
-			initData[name]*= G4UIcommand::ValueOf(unit.c_str());
-			unitData[name] = unit;
-		}
 	}
 	ifs.close();
 }
 
 void InputData::SummarizeData(){
 	cout<<"[Initial data summary]"<<endl;
-	for(auto datum:valueData)
-		cout<<setw(10)<<datum.first<<" = " <<datum.second<<" ["<<unitData[datum.first]<<"] = "<<initData[datum.first]<<endl;
+	for(auto datum:initData)
+		cout<<setw(10)<<datum.first<<" = " <<datum.second<<endl;
 }
